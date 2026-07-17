@@ -1,0 +1,43 @@
+# Annealed aggressiveness: the aggressive suite showed strong prioritization
+# wins the early race (best steps-to-90%, zero seed variance) but loses the
+# late game as coverage collapses. Here alpha anneals from 1.0 (full
+# proportional conditioning) toward 0 (uniform) over training: pheromone-led
+# early optimization, uniform late-stage regularization.
+suite: fmnist_anneal
+seeds: [0, 1, 2]
+base:
+  out_dir: results/fmnist_anneal
+  data:
+    dataset: fashion_mnist
+  model:
+    name: small_cnn
+  optim:
+    name: adam
+    lr: 1.0e-3
+  train:
+    batch_size: 128
+    epochs: 15
+    log_every: 50
+    probe_interval: 500
+  sampling:
+    mode: pheromone
+    warmup_epochs: 1
+    pheromone:
+      score: loss
+      alpha: 1.0
+      alpha_end: 0.0
+      rho: 1.0
+      kappa: 0.0
+      lam: 0.01
+      is_correction: none
+  wandb:
+    enabled: true
+variants:
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}
+  - name: ann_loss
+    set: {}
+  - name: ann_loss03
+    set: {sampling.pheromone.alpha_end: 0.3}
+  - name: ann_grad
+    set: {sampling.pheromone.score: grad_norm_proxy}

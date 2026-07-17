@@ -1,0 +1,30 @@
+# Fixed reference runs for the CIFAR-10 sweep: identical model/optimizer/
+# schedule, uniform and epoch-shuffle sampling. Run once per machine or split
+# seeds across machines.
+suite: cifar10_baselines
+seeds: [0, 1]
+base:
+  out_dir: results/cifar10_baselines
+  data:
+    dataset: cifar10
+  model:
+    name: resnet18
+  optim:
+    name: sgd
+    lr: 0.1
+    momentum: 0.9
+    weight_decay: 5.0e-4
+    scheduler: cosine
+  train:
+    batch_size: 128
+    epochs: 40
+    log_every: 100
+    probe_interval: 2000
+    acc_targets: [0.80, 0.85, 0.90, 0.93]
+  wandb:
+    enabled: true
+variants:
+  - name: epoch_shuffle
+    set: {sampling.mode: epoch_shuffle}
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}

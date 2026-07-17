@@ -1,0 +1,33 @@
+# Robustness ablation: 20% label noise. Tracks sampler/noisy_frac — the share
+# of batch draws that are corrupted samples (loss-prioritization is expected to
+# over-sample them; grad scoring / rank transform / lower rho mitigate).
+suite: fmnist_noisy
+seeds: [0, 1, 2]
+base:
+  out_dir: results/fmnist_noisy
+  data:
+    dataset: fashion_mnist
+    label_noise: 0.2
+  model:
+    name: small_cnn
+  optim:
+    name: adam
+    lr: 1.0e-3
+  train:
+    batch_size: 128
+    epochs: 15
+    log_every: 50
+    probe_interval: 500
+  sampling:
+    warmup_epochs: 1
+  wandb:
+    enabled: true
+variants:
+  - name: epoch_shuffle
+    set: {sampling.mode: epoch_shuffle}
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}
+  - name: pher_loss
+    set: {sampling.mode: pheromone, sampling.pheromone.score: loss}
+  - name: pher_grad
+    set: {sampling.mode: pheromone, sampling.pheromone.score: grad_norm_proxy}

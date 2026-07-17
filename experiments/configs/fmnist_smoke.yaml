@@ -1,0 +1,25 @@
+# 2-minute end-to-end sanity check (pheromone-loss on a Fashion-MNIST subset).
+run_name: smoke
+out_dir: results/smoke
+data:
+  dataset: fashion_mnist
+  subset_train: 6000
+  subset_test: 2000
+model:
+  name: small_cnn
+optim:
+  name: adam
+  lr: 1.0e-3
+train:
+  batch_size: 128
+  epochs: 3
+  log_every: 20
+  probe_interval: 100
+  seed: 0
+sampling:
+  mode: pheromone
+  warmup_epochs: 1
+  pheromone:
+    score: loss
+wandb:
+  enabled: false

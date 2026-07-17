@@ -1,0 +1,46 @@
+# W&B sweep spec: Bayesian search over the pheromone design space on
+# CIFAR-10 / ResNet-18, informed by the Fashion-MNIST findings (annealed alpha
+# recovers accuracy while keeping early speed; kappa/lam/IS control coverage).
+#
+#   uv run wandb sweep --entity osuwaidi-khalifa-university --project CL-ACO \
+#       experiments/configs/cifar10_sweep.yaml
+#   uv run wandb agent osuwaidi-khalifa-university/CL-ACO/<SWEEP_ID> --count 12
+#
+# Compare trials against the fixed baselines from cifar10_baselines.yaml.
+program: experiments/sweep_run.py
+method: bayes
+metric:
+  name: test/acc
+  goal: maximize
+early_terminate:
+  type: hyperband
+  min_iter: 12
+parameters:
+  ph_score:
+    values: [loss, grad_norm_proxy]
+  ph_alpha:
+    values: [0.6, 1.0]
+  ph_alpha_end:
+    values: [-1, 0.0, 0.3]     # -1 = no annealing (alpha stays fixed)
+  ph_replacement:
+    values: [true, false]      # false = pheromone-ordered pass without
+                               # replacement (pure reordering; ph_is inert)
+  ph_rho:
+    values: [0.6, 1.0]
+  ph_kappa:
+    values: [0.0, 0.001]
+  ph_lam:
+    values: [0.01, 0.05]
+  ph_is:
+    values: [none, per]
+  ph_transform:
+    values: [proportional, rank]
+  warmup_epochs:
+    values: [1, 2]
+  seed:
+    value: 0
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --config=experiments/configs/cifar10_base.yaml

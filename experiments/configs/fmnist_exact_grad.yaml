@@ -1,0 +1,43 @@
+# Does the EXACT full per-sample gradient norm work better as the pheromone
+# than its cheap surrogates? torch.func.vmap is CPU/CUDA-only and ~10-100x the
+# step cost, so this runs on a CPU-friendly subset with all variants on CPU
+# for a like-for-like comparison. Aggressive regime settings as in
+# fmnist_aggressive.
+suite: fmnist_exact_grad
+seeds: [0, 1]
+base:
+  out_dir: results/fmnist_exact_grad
+  data:
+    dataset: fashion_mnist
+    subset_train: 8000
+    subset_test: 4000
+  model:
+    name: small_cnn
+  optim:
+    name: adam
+    lr: 1.0e-3
+  train:
+    batch_size: 128
+    epochs: 8
+    log_every: 20
+    device: cpu
+  sampling:
+    mode: pheromone
+    warmup_epochs: 1
+    pheromone:
+      alpha: 1.0
+      rho: 1.0
+      kappa: 0.0
+      lam: 0.01
+      is_correction: none
+  wandb:
+    enabled: true
+variants:
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}
+  - name: loss
+    set: {sampling.pheromone.score: loss}
+  - name: grad_proxy
+    set: {sampling.pheromone.score: grad_norm_proxy}
+  - name: grad_exact
+    set: {sampling.pheromone.score: grad_norm_exact}

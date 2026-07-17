@@ -1,0 +1,30 @@
+# Main comparison: 4 strategies x 3 seeds on full Fashion-MNIST.
+suite: fmnist_suite
+seeds: [0, 1, 2]
+base:
+  out_dir: results/fmnist_suite
+  data:
+    dataset: fashion_mnist
+  model:
+    name: small_cnn
+  optim:
+    name: adam
+    lr: 1.0e-3
+  train:
+    batch_size: 128
+    epochs: 15
+    log_every: 50
+    probe_interval: 500
+  sampling:
+    warmup_epochs: 1
+  wandb:
+    enabled: true
+variants:
+  - name: epoch_shuffle
+    set: {sampling.mode: epoch_shuffle}
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}
+  - name: pher_loss
+    set: {sampling.mode: pheromone, sampling.pheromone.score: loss}
+  - name: pher_grad
+    set: {sampling.mode: pheromone, sampling.pheromone.score: grad_norm_proxy}

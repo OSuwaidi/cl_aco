@@ -1,0 +1,51 @@
+# Aggressive prioritization regime: the main suite showed selection entropy
+# stuck near maximum (conditioning too gentle). Here: full/sharpened alpha,
+# hard assignment (rho=1), staleness growth removed (kappa=0), weak uniform
+# floor (lam=0.01), and NO importance-weight correction — pure conditioning,
+# the sampling tilt is allowed to shape the expected gradient (curriculum
+# semantics). alpha10 is the literal original formulation (p proportional to
+# pheromone = last loss). alpha10_is isolates the effect of bias correction.
+# accum is classic ACO with zero evaporation: deposits pile up forever.
+suite: fmnist_aggressive
+seeds: [0, 1, 2]
+base:
+  out_dir: results/fmnist_aggressive
+  data:
+    dataset: fashion_mnist
+  model:
+    name: small_cnn
+  optim:
+    name: adam
+    lr: 1.0e-3
+  train:
+    batch_size: 128
+    epochs: 15
+    log_every: 50
+    probe_interval: 500
+  sampling:
+    mode: pheromone
+    warmup_epochs: 1
+    pheromone:
+      score: loss
+      alpha: 1.0
+      rho: 1.0
+      kappa: 0.0
+      lam: 0.01
+      is_correction: none
+  wandb:
+    enabled: true
+variants:
+  - name: uniform
+    set: {sampling.mode: uniform_replacement}
+  - name: alpha10
+    set: {train.exact_corr_interval: 500}
+  - name: alpha20
+    set: {sampling.pheromone.alpha: 2.0}
+  - name: rank07
+    set: {sampling.pheromone.transform: rank, sampling.pheromone.alpha: 0.7}
+  - name: accum
+    set: {sampling.pheromone.update_rule: accumulate, sampling.pheromone.evap: 0.0}
+  - name: grad_alpha10
+    set: {sampling.pheromone.score: grad_norm_proxy, train.exact_corr_interval: 500}
+  - name: alpha10_is
+    set: {sampling.pheromone.is_correction: per}

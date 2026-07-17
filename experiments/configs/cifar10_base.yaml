@@ -1,0 +1,28 @@
+# Base config for W&B sweep trials on CIFAR-10 / ResNet-18 (CUDA).
+# Sweep parameters (experiments/configs/cifar10_sweep.yaml) override the
+# sampling.pheromone.* block via experiments/sweep_run.py.
+out_dir: results/cifar10_sweep
+data:
+  dataset: cifar10
+model:
+  name: resnet18
+optim:
+  name: sgd
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 5.0e-4
+  scheduler: cosine
+train:
+  batch_size: 128
+  epochs: 40
+  log_every: 100
+  probe_interval: 2000
+  acc_targets: [0.80, 0.85, 0.90, 0.93]
+  seed: 0
+  device: auto
+sampling:
+  mode: pheromone
+  warmup_epochs: 1
+wandb:
+  enabled: true
+  group: cifar10_sweep
