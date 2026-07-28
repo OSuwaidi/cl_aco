@@ -24,6 +24,8 @@ PARAM_MAP = {
     "ph_kappa": "sampling.pheromone.kappa",
     "ph_lam": "sampling.pheromone.lam",
     "ph_is": "sampling.pheromone.is_correction",
+    "ph_beta_start": "sampling.pheromone.beta_start",
+    "ph_beta_end": "sampling.pheromone.beta_end",
     "ph_transform": "sampling.pheromone.transform",
     "ph_replacement": "sampling.pheromone.replacement",
     "ph_update_rule": "sampling.pheromone.update_rule",

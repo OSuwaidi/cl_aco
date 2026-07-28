@@ -1,0 +1,54 @@
+# Multi-seed confirmation of the sweep winners vs baselines. The sweep ran a
+# single seed per trial; this suite establishes whether the ~+0.3-0.5pp edge
+# survives seed noise. `pher_best` is the robust winning cell (with-replacement,
+# anneal 1.0 -> 0, IS-corrected, loss score); `pher_rank_wor` is the single
+# best trial's config (rank + without-replacement + fixed alpha), included to
+# test whether that outlier replicates.
+suite: cifar10_confirm
+seeds: [ 0, 1, 2, 3 ]
+base:
+  out_dir: results/cifar10_confirm
+  data:
+    dataset: cifar10
+  model:
+    name: resnet18
+  optim:
+    name: sgd
+    lr: 0.1
+    momentum: 0.9
+    weight_decay: 5.0e-4
+    scheduler: cosine
+  train:
+    batch_size: 128
+    epochs: 40
+    log_every: 100
+    probe_interval: 2000
+    acc_targets: [ 0.80, 0.85, 0.90, 0.93 ]
+  sampling:
+    mode: pheromone
+    warmup_epochs: 2
+    pheromone:
+      score: loss
+      is_correction: per
+      kappa: 0.001
+      lam: 0.01
+  wandb:
+    enabled: true
+variants:
+  - name: epoch_shuffle
+    set: { sampling.mode: epoch_shuffle }
+  - name: uniform
+    set: { sampling.mode: uniform_replacement }
+  - name: pher_best
+    set: { sampling.pheromone.alpha: 1.0, sampling.pheromone.alpha_end: 0.0,
+           sampling.pheromone.rho: 1.0, sampling.pheromone.replacement: true,
+           sampling.pheromone.transform: proportional }
+  - name: pher_rank_wor
+    set: { sampling.pheromone.alpha: 0.6, sampling.pheromone.rho: 1.0,
+           sampling.pheromone.replacement: false,
+           sampling.pheromone.transform: rank }
+  - name: pher_best_grad
+    set: { sampling.pheromone.alpha: 1.0, sampling.pheromone.alpha_end: 0.0,
+           sampling.pheromone.rho: 1.0, sampling.pheromone.replacement: true,
+           sampling.pheromone.transform: proportional,
+           sampling.pheromone.score: grad_norm_proxy }

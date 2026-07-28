@@ -27,6 +27,10 @@ from .utils import Timer, pick_device, seed_everything
 LOSS_EMA = 0.02
 
 
+def _acc_pct(acc: float) -> float:
+    return round(acc * 100.0, 2)
+
+
 class Trainer:
     def __init__(self, cfg: Config, out_dir: str | Path | None = None,
                  quiet: bool = False):
@@ -173,7 +177,7 @@ class Trainer:
                 record.update({
                     "train/loss": batch_loss,
                     "train/loss_ema": self.loss_ema,
-                    "train/acc_batch": batch_acc,
+                    "train/acc_batch": _acc_pct(batch_acc),
                     "time/wall_s": self._wall(),
                 })
                 if self.is_pheromone and not in_warmup:
@@ -211,7 +215,7 @@ class Trainer:
         record = {
             "epoch": epoch,
             "test/loss": test_loss,
-            "test/acc": test_acc,
+            "test/acc": _acc_pct(test_acc),
             "sampler/coverage_epoch": self.seen.float().mean().item(),
             "time/wall_s": self._wall(),
         }
@@ -252,9 +256,8 @@ class Trainer:
             "mode": self.cfg.sampling.mode,
             "score": (self.cfg.sampling.pheromone.score if self.is_pheromone else None),
             "seed": self.cfg.train.seed,
-            "final_acc": test_acc,
             "final_loss": test_loss,
-            "best_acc": self.best_acc,
+            "best_acc": _acc_pct(self.best_acc),
             "total_steps": self.total_steps,
             "wall_s": self._wall(),
         }

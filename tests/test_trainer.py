@@ -48,7 +48,7 @@ def test_all_strategies_train_and_learn(tmp_path):
     for name, tree in variants.items():
         tree.setdefault("train", {})["probe_interval"] = 16
         _, summary = run(tmp_path, name, **tree)
-        assert summary["final_acc"] > 0.5, f"{name} failed to learn"
+        assert summary["best_acc"] > 50.0, f"{name} failed to learn"
         metrics = (tmp_path / name / "metrics.jsonl").read_text().strip().splitlines()
         assert len(metrics) > 0
 
@@ -65,7 +65,7 @@ def test_exact_grad_scorer_mode_runs(tmp_path):
 def test_same_seed_reproduces_run(tmp_path):
     _, s1 = run(tmp_path, "det_a")
     _, s2 = run(tmp_path, "det_b")
-    assert s1["final_acc"] == s2["final_acc"]
+    assert s1["best_acc"] == s2["best_acc"]
     assert s1["final_loss"] == s2["final_loss"]
 
 
@@ -118,7 +118,7 @@ def test_wor_mode_has_full_coverage_every_epoch(tmp_path):
 
     _, summary = run(tmp_path, "wor_cov",
                      sampling={"pheromone": {"replacement": False}})
-    assert summary["final_acc"] > 0.5
+    assert summary["best_acc"] > 50.0
     records = [json.loads(l) for l in
                (tmp_path / "wor_cov" / "metrics.jsonl").read_text().splitlines()]
     coverages = [r["sampler/coverage_epoch"] for r in records

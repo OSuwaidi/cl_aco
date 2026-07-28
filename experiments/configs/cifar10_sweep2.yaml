@@ -1,0 +1,61 @@
+# Refinement sweep: zoom into the winning region of sweep efo41jw0.
+# Fixed (clear categorical winners there): score=loss (free; tied with proxy),
+# is_correction=per (IS-off was consistently worse/killed), proportional
+# transform (more consistent than rank), with-replacement sampling (best cell:
+# replacement x anneal-to-0), warmup=2. Continuous Bayes search over the
+# strength/dynamics knobs around the winners; alpha_end stays near 0 because
+# 0 won and 0.3 was hyperband-killed 14/15 times.
+#
+#   uv run wandb sweep --entity osuwaidi-khalifa-university --project CL-ACO \
+#       experiments/configs/cifar10_sweep2.yaml
+#   uv run wandb agent osuwaidi-khalifa-university/CL-ACO/<SWEEP_ID> --count 15
+program: experiments/sweep_run.py
+method: bayes
+metric:
+  name: test/acc
+  goal: maximize
+early_terminate:
+  type: hyperband
+  min_iter: 12
+parameters:
+  ph_alpha:
+    distribution: uniform
+    min: 0.5
+    max: 1.2
+  ph_alpha_end:
+    distribution: uniform
+    min: 0.0
+    max: 0.2
+  ph_rho:
+    distribution: uniform
+    min: 0.4
+    max: 1.0
+  ph_kappa:
+    distribution: log_uniform_values
+    min: 1.0e-4
+    max: 1.0e-2
+  ph_lam:
+    distribution: log_uniform_values
+    min: 0.003
+    max: 0.05
+  ph_beta_start:
+    distribution: uniform
+    min: 0.2
+    max: 0.8
+  ph_score:
+    value: loss
+  ph_is:
+    value: per
+  ph_transform:
+    value: proportional
+  ph_replacement:
+    value: true
+  warmup_epochs:
+    value: 2
+  seed:
+    value: 0
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --config=experiments/configs/cifar10_base.yaml

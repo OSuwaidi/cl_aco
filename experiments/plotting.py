@@ -65,7 +65,7 @@ def plot_single_run(out_dir: Path) -> Path:
     apply_style()
     records = load_jsonl(Path(out_dir) / "metrics.jsonl")
     fig, axes = plt.subplots(1, 3, figsize=(13, 3.6))
-    panels = [("test/acc", "Test accuracy"),
+    panels = [("test/acc", "Test accuracy (%)"),
               ("test/loss", "Test loss"),
               ("train/loss_ema", "Train loss (EMA)")]
     for ax, (key, title) in zip(axes, panels):
@@ -107,12 +107,12 @@ def plot_suite(suite_dir: Path, variant_names: list[str]) -> Path:
             data[name] = runs
 
     panels = [
-        ("test/acc", "Test accuracy vs step", None),
+        ("test/acc", "Test accuracy (%) vs step", None),
         ("test/loss", "Test loss vs step", None),
         ("probe/grad_var_rel", "Relative gradient variance (probe)", "log"),
         ("sampler/entropy_norm", "Selection entropy / log N", None),
         ("sampler/coverage_epoch", "Unique coverage per epoch-equiv", None),
-        ("__acc_vs_wall__", "Test accuracy vs wall-clock (s)", None),
+        ("__acc_vs_wall__", "Test accuracy (%) vs wall-clock (s)", None),
     ]
     fig, axes = plt.subplots(2, 3, figsize=(15, 8))
     for ax, (key, title, yscale) in zip(axes.flat, panels):
@@ -168,7 +168,7 @@ def write_summary(suite_dir: Path, variant_names: list[str],
             return f"{np.mean(vals):.4g} ± {np.std(vals):.2g}"
 
         row = {"variant": name, "seeds": len(summaries),
-               "final_acc": agg("final_acc"), "best_acc": agg("best_acc"),
+               "best_acc": agg("best_acc"),
                "wall_s": agg("wall_s")}
         for t in acc_targets:
             key = f"steps_to_{int(round(t * 100))}"
